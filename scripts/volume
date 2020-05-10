@@ -73,9 +73,21 @@ mixer_value() {
 }
 
 case $BLOCK_BUTTON in
-3) amixer -q -D $MIXER sset $SCONTROL $(mixer_capability) toggle ;; # right click, mute/unmute
-4) amixer -q -D $MIXER sset $SCONTROL $(mixer_capability) ${STEP}${UNIT}+ ;; # scroll up, increase
-5) amixer -q -D $MIXER sset $SCONTROL $(mixer_capability) ${STEP}${UNIT}- ;; # scroll down, decrease
+1) # Handle left click, default to launch volume control settings
+    LEFT_CLICK_ACTION=$(xrescat i3xrocks.volume.left_click_action "$(which gnome-control-center) sound")
+    [[ ! -z $LEFT_CLICK_ACTION ]] && $(which i3-msg) -q exec "$LEFT_CLICK_ACTION" ;;
+2) # Handle middle click, default to no action
+    MIDDLE_CLICK_ACTION=$(xrescat i3xrocks.volume.middle_click_action "")
+    [[ ! -z $MIDDLE_CLICK_ACTION ]] && $(which i3-msg) -q exec "$MIDDLE_CLICK_ACTION" ;;
+3) # Handle right click, default mute/unmute toggle
+    RIGHT_CLICK_ACTION=$(xrescat i3xrocks.volume.right_click_action "amixer -q -D $MIXER sset $SCONTROL $(mixer_capability) toggle")
+    [[ ! -z $RIGHT_CLICK_ACTION ]] && $(which i3-msg) -q exec "$RIGHT_CLICK_ACTION" ;;
+4) # Handle scroll up, default increase volume
+    SCROLL_UP_ACTION=$(xrescat i3xrocks.volume.scroll_up_action "amixer -q -D $MIXER sset $SCONTROL $(mixer_capability) ${STEP}${UNIT}+")
+    [[ ! -z $SCROLL_UP_ACTION ]] && $(which i3-msg) -q exec "$SCROLL_UP_ACTION" ;;
+5) # Handle scroll down, default decrease volume
+    SCROLL_DOWN_ACTION=$(xrescat i3xrocks.volume.scroll_down_action "amixer -q -D $MIXER sset $SCONTROL $(mixer_capability) ${STEP}${UNIT}-")
+    [[ ! -z $SCROLL_DOWN_ACTION ]] && $(which i3-msg) -q exec "$SCROLL_DOWN_ACTION" ;;
 esac
 
 LABEL_COLOR=${label_color:-$(xrescat i3xrocks.label.color "#E6E1CF")}
