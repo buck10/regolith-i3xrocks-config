@@ -6,5 +6,38 @@ VALUE_FONT=${font:-$(xrescat i3xrocks.value.font)}
 PANGO_START="<span color=\"${VALUE_COLOR}\" font_desc=\"${VALUE_FONT}\">"
 PANGO_END="</span>"
 
-gsettings get org.gnome.desktop.input-sources sources | sed -r "s,\S*\s'([^']+).*,$PANGO_START\1$PANGO_END,"
-gsettings monitor org.gnome.desktop.input-sources sources | sed -u -r "s,\S*\s\S*\s'([^']+).*,$PANGO_START\1$PANGO_END,"
+# usage: get_gsettings_keyboard_layout [sources | mru-sources]
+get_gsettings_keyboard_layout() {
+  echo $(gsettings get org.gnome.desktop.input-sources "${1}" | sed -u -r "s,\S*\s'([^']+).*,\1,")
+}
+
+# handle potential bug in Gnome where mru-sources are not initialized on installation of OS
+if [ $(get_gsettings_keyboard_layout "mru-sources" | sed -u -r "s,^.*\[,\[,") == "[]" ]; then
+    #MRU sources hasn't been initialized, use sources from org.gnome.desktop.input-sources
+    KBD=$(get_gsettings_keyboard_layout "sources")
+else
+    #MRU sources are good too use
+    KBD=$(get_gsettings_keyboard_layout "mru-sources")
+fi
+
+case "$button" in
+1) # Handle left click, default to launch region settings
+    LEFT_CLICK_ACTION=$(xrescat i3xrocks.battery.left_click_action "$(which gnome-control-center) region")
+    [[ ! -z $LEFT_CLICK_ACTION ]] && $(which i3-msg) -q exec "$LEFT_CLICK_ACTION" ;;
+2) # Handle middle click, default to display keyboard layout
+    # if variant present in keyboard layout, replace '+' with tab as expected by gkbd-keyboard-display
+    KBD_LANG="$(echo $KBD | sed 's,+,\t,')"
+    MIDDLE_CLICK_ACTION=$(xrescat i3xrocks.battery.middle_click_action "$(which gkbd-keyboard-display) -l '$KBD_LANG'")
+    [[ ! -z $MIDDLE_CLICK_ACTION ]] && $(which i3-msg) -q exec "$MIDDLE_CLICK_ACTION" ;;
+3) # Handle right click, default to no action
+    RIGHT_CLICK_ACTION=$(xrescat i3xrocks.battery.right_click_action "")
+    [[ ! -z $RIGHT_CLICK_ACTION ]] && $(which i3-msg) -q exec "$RIGHT_CLICK_ACTION" ;;
+4) # Handle scroll up, default to no action
+    SCROLL_UP_ACTION=$(xrescat i3xrocks.battery.scroll_up_action "")
+    [[ ! -z $SCROLL_UP_ACTION ]] && $(which i3-msg) -q exec "$SCROLL_UP_ACTION" ;;
+5) # Handle scroll down, default to no action
+    SCROLL_DOWN_ACTION=$(xrescat i3xrocks.battery.scroll_down_action "")
+    [[ ! -z $SCROLL_DOWN_ACTION ]] && $(which i3-msg) -q exec "$SCROLL_DOWN_ACTION" ;;
+esac
+
+echo "${PANGO_START}${KBD}${PANGO_END}"
