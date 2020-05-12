@@ -52,8 +52,10 @@ binmode STDOUT, ":utf8";
 printf "<span color='%s'>%s</span><span font_desc='%s' color='%s'> %02d%%</span>\n", $label_color, $value_icon, $value_font, $value_color, $cpu_usage;
 printf "<span font_desc='%s' color='%s'> %02d%%</span>\n", $value_font, $value_color, $cpu_usage;
 
-if ($ENV{'button'} == 1) {
-    system('/usr/bin/i3-msg -q exec /usr/bin/gnome-system-monitor')
+my $button = $ENV{'button'} || 0;
+if ($button == 1) {
+    # open system monitor and make sure processes tab is selected
+    system('/usr/bin/i3-msg -q exec "/usr/bin/gnome-system-monitor -p"')
 }
 
 exit 0;
