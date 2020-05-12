@@ -1,4 +1,5 @@
 # Disk Capacity
 [disk-capacity]
-interval=240
-#mnt=/home
+interval=10
+#uncomment and modify to display desired drive information
+#MNT=/home
