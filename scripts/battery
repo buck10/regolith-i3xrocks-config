@@ -27,6 +27,12 @@ __UPOWER_INFO=$(upower --show-info "/org/freedesktop/UPower/devices/battery_${BL
 BATT_PERCENT=$(get_battery_percent)
 CHARGE_STATE=$(get_battery_status)
 
+#DEBUG_BATTERY=1
+if [ ! -z $DEBUG_BATTERY ]; then
+    BATT_PERCENT=10
+    CHARGE_STATE="discharging"
+fi
+
 if [ -z "$BATT_PERCENT" ]; then
     exit 0
 elif [ "$BATT_PERCENT" -ge 0 ] && [ "$BATT_PERCENT" -le 20 ]; then
