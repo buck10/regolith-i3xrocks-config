@@ -46,8 +46,8 @@ case "$button" in
 2) # Handle middle click, default to no action
     MIDDLE_CLICK_ACTION=$(xrescat i3xrocks.time.middle_click_action "")
     [[ ! -z $MIDDLE_CLICK_ACTION ]] && $(which i3-msg) -q exec "$MIDDLE_CLICK_ACTION" ;;
-3) # Handle right click, default to no action
-    RIGHT_CLICK_ACTION=$(xrescat i3xrocks.time.right_click_action "")
+3) # Handle right click, default to show calendar
+    RIGHT_CLICK_ACTION=$(xrescat i3xrocks.time.right_click_action "$(which gnome-calendar)")
     [[ ! -z $RIGHT_CLICK_ACTION ]] && $(which i3-msg) -q exec "$RIGHT_CLICK_ACTION" ;;
 4) # Handle scroll up, default to no action
     SCROLL_UP_ACTION=$(xrescat i3xrocks.time.scroll_up_action "")
