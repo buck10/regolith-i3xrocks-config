@@ -2,7 +2,8 @@
 # This time blocklet will use Xresources date format if defined
 # or try to determine most appropriate format based on locale and GNOME settings.
 
-DATE_FORMAT=`xrescat i3xrocks.date.format2`
+DATE_FORMAT=$(xrescat i3xrocks.date.format2)
+BUTTON=${button:-}
 
 if [ -z "$DATE_FORMAT" ]; then # No custom format defined, use system defaults
     COUNTRY=$(locale | grep LC_TIME | head -n1 | cut -d "=" -f 2 | cut -d "_" -f 2 | cut -d "." -f 1)
@@ -18,15 +19,15 @@ if [ -z "$DATE_FORMAT" ]; then # No custom format defined, use system defaults
             ;;
         esac
     fi
-    
+
     TIME_FORMAT=$(gsettings get org.gnome.desktop.interface clock-format)
-    
+
     if [ "$TIME_FORMAT" == "'12h'" ]; then
         TIME_SPEC="%I:%M"
     else
         TIME_SPEC="%H:%M"
     fi
-    
+
     DATE_VALUE=$(date "+ $DATE_SPEC $TIME_SPEC")
 else
     DATE_VALUE=$(date "$DATE_FORMAT")
@@ -39,20 +40,6 @@ VALUE_COLOR=${color:-$(xrescat i3xrocks.value.color "#D8DEE9")}
 VALUE_FONT=${font:-$(xrescat i3xrocks.value.font "Source Code Pro Medium 13")}
 echo "<span color=\"${LABEL_COLOR}\">$LABEL_ICON</span><span font_desc=\"${VALUE_FONT}\" color=\"${VALUE_COLOR}\">$DATE_VALUE </span>"
 
-case "$button" in
-1) # Handle left click, default to launch date/time settings
-    LEFT_CLICK_ACTION=$(xrescat i3xrocks.time.left_click_action "$(which gnome-control-center) datetime")
-    [[ ! -z $LEFT_CLICK_ACTION ]] && $(which i3-msg) -q exec "$LEFT_CLICK_ACTION" ;;
-2) # Handle middle click, default to no action
-    MIDDLE_CLICK_ACTION=$(xrescat i3xrocks.time.middle_click_action "")
-    [[ ! -z $MIDDLE_CLICK_ACTION ]] && $(which i3-msg) -q exec "$MIDDLE_CLICK_ACTION" ;;
-3) # Handle right click, default to show calendar
-    RIGHT_CLICK_ACTION=$(xrescat i3xrocks.time.right_click_action "$(which gnome-calendar)")
-    [[ ! -z $RIGHT_CLICK_ACTION ]] && $(which i3-msg) -q exec "$RIGHT_CLICK_ACTION" ;;
-4) # Handle scroll up, default to no action
-    SCROLL_UP_ACTION=$(xrescat i3xrocks.time.scroll_up_action "")
-    [[ ! -z $SCROLL_UP_ACTION ]] && $(which i3-msg) -q exec "$SCROLL_UP_ACTION" ;;
-5) # Handle scroll down, default to no action
-    SCROLL_DOWN_ACTION=$(xrescat i3xrocks.time.scroll_down_action "")
-    [[ ! -z $SCROLL_DOWN_ACTION ]] && $(which i3-msg) -q exec "$SCROLL_DOWN_ACTION" ;;
-esac
+if [ "x${BUTTON}" == "x1" ]; then
+    /usr/bin/i3-msg -q exec /usr/bin/gnome-control-center --class=floating_window datetime
+fi
